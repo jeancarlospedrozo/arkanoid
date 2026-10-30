@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project state
 
-Arkanoid/Breakout browser game, pre-implementation: only assets exist so far. There is no `index.html`, game code, package manifest, build, lint, or test setup yet, so there are no commands to run. Update this file when they are added.
+Arkanoid/Breakout browser game. `index.html` at the repo root is the entry point and loads `assets/spritesheet.js` and then `src/game.js`, both as classic scripts that share globals.
+
+To run the game, open `index.html` directly in a browser; it needs no server or install. There is no package manifest, build, lint, or test setup, so there are no commands to run. Update this file when they are added.
 
 ## Workflow: spec-driven development
 
@@ -28,6 +30,6 @@ The skills live in `.agents/skills/`; `.claude/skills/` holds symlinks to them s
 - Sprite color keys do not match the artwork: by eye, `cyan` is teal-green, `green` is blue, `magenta` is purple, and `hotpink` is orange. Choose colors by looking at the sheet, not the key name.
 - `EXPLOSION_FRAMES.gray` reuses the red row's coordinates, so gray blocks explode in red.
 
-`assets/sounds/` holds `ball-bounce.mp3` and `break-sound.mp3`; no code references them yet.
+`assets/sounds/` holds `ball-bounce.mp3` and `break-sound.mp3`, both played from `src/game.js`.
 
-The spritesheet says "Made by Petraheim - Credits Appreciated", so credit the artist in the finished game.
+The spritesheet says "Made by Petraheim - Credits Appreciated", so `index.html` credits the artist under the canvas; keep that credit.

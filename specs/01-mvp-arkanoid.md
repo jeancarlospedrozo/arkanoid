@@ -1,6 +1,6 @@
 # SPEC 01 — MVP jugable de Arkanoid
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** None
 > **Date:** 2026-10-30
 > **Objective:** Construir un Arkanoid de un nivel, jugable en el navegador con teclado o ratón.
