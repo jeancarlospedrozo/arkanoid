@@ -1,6 +1,6 @@
 # SPEC 01 — MVP jugable de Arkanoid
 
-> **Status:** Draft
+> **Status:** Approved
 > **Depends on:** None
 > **Date:** 2026-10-30
 > **Objective:** Construir un Arkanoid de un nivel, jugable en el navegador con teclado o ratón.
@@ -37,13 +37,17 @@
 ```js
 // src/game.js
 const state = {
-  status: 'serving', // 'serving' | 'playing' | 'won' | 'lost'
+  status: "serving", // 'serving' | 'playing' | 'won' | 'lost'
   score: 0,
   lives: 3,
   paddle: { x: 319, y: 560, w: 162, h: 14 },
   ball: { x: 392, y: 544, size: 16, vx: 0, vy: 0 },
-  blocks: [/* { x, y, w: 64, h: 32, color, alive: true } */],
-  explosions: [/* { x, y, color, elapsed: 0 } */],
+  blocks: [
+    /* { x, y, w: 64, h: 32, color, alive: true } */
+  ],
+  explosions: [
+    /* { x, y, color, elapsed: 0 } */
+  ],
 };
 ```
 
@@ -112,12 +116,12 @@ Conventions:
 
 ## Risks
 
-| Risk | Mitigation |
-| ---- | ---------- |
-| Falla la carga de la spritesheet | `loadSpritesheet` registra el error en consola y el canvas se queda en "Cargando…", sin arrancar el bucle. |
-| Falla la carga o reproducción de un sonido | El error de `play()` se captura y la partida sigue sin ese sonido. |
-| La pelota atraviesa un bloque tras una pausa del navegador | El límite de 1/30 s reduce el avance a 12 px por actualización, menos que el alto de un bloque. |
-| La pelota queda en vertical si golpea el centro exacto | El jugador puede cambiar el ángulo moviendo la paleta antes del siguiente golpe. |
+| Risk                                                       | Mitigation                                                                                                 |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Falla la carga de la spritesheet                           | `loadSpritesheet` registra el error en consola y el canvas se queda en "Cargando…", sin arrancar el bucle. |
+| Falla la carga o reproducción de un sonido                 | El error de `play()` se captura y la partida sigue sin ese sonido.                                         |
+| La pelota atraviesa un bloque tras una pausa del navegador | El límite de 1/30 s reduce el avance a 12 px por actualización, menos que el alto de un bloque.            |
+| La pelota queda en vertical si golpea el centro exacto     | El jugador puede cambiar el ángulo moviendo la paleta antes del siguiente golpe.                           |
 
 ## What is **not** in this spec
 
