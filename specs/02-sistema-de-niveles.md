@@ -1,6 +1,6 @@
 # SPEC 02 — Sistema de niveles
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 01
 > **Date:** 2026-10-30
 > **Objective:** Convertir la partida de un nivel en una progresión de 3 niveles con diseños de bloques distintos y una pelota cada vez más rápida.

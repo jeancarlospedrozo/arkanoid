@@ -1,6 +1,42 @@
 const canvas = document.getElementById( 'game' );
 const ctx = canvas.getContext( '2d' );
 
+const LEVELS = [
+  {
+    ballSpeed: 360,
+    map: [
+      'XXXXXXXXXXXX',
+      'XXXXXXXXXXXX',
+      'XXXXXXXXXXXX',
+      'XXXXXXXXXXXX',
+      'XXXXXXXXXXXX',
+      'XXXXXXXXXXXX',
+    ],
+  },
+  {
+    ballSpeed: 420,
+    map: [
+      '.....XX.....',
+      '....XXXX....',
+      '...XXXXXX...',
+      '..XXXXXXXX..',
+      '.XXXXXXXXXX.',
+      'XXXXXXXXXXXX',
+    ],
+  },
+  {
+    ballSpeed: 480,
+    map: [
+      'X.X.X.X.X.X.',
+      '.X.X.X.X.X.X',
+      'X.X.X.X.X.X.',
+      '.X.X.X.X.X.X',
+      'X.X.X.X.X.X.',
+      '.X.X.X.X.X.X',
+    ],
+  },
+];
+
 const BLOCK_COLUMNS = 12;
 const BLOCK_ROWS = [ 'red', 'hotpink', 'yellow', 'cyan', 'green', 'magenta' ];
 const BLOCK_WIDTH = 64;
@@ -8,7 +44,6 @@ const BLOCK_HEIGHT = 32;
 const BLOCKS_X = 16;
 const BLOCKS_Y = 60;
 const PADDLE_SPEED = 600;
-const BALL_SPEED = 360;
 const LAUNCH_ANGLE = Math.PI / 6;
 const MAX_BOUNCE_ANGLE = Math.PI / 3;
 const BLOCK_POINTS = 10;
@@ -16,6 +51,7 @@ const MAX_DELTA = 1 / 30;
 
 const STATUS_MESSAGES = {
   serving: { title: 'Arkanoid', hint: 'Pulsa Espacio o haz clic para lanzar' },
+  levelComplete: { title: 'Nivel {level} completado', hint: 'Pulsa Espacio o haz clic para continuar' },
   won: { title: '¡Victoria!', hint: 'Pulsa Espacio o haz clic para jugar de nuevo' },
   lost: { title: 'Game over', hint: 'Pulsa Espacio o haz clic para jugar de nuevo' },
 };
@@ -32,10 +68,13 @@ function playSound( sound ) {
   sound.play().catch( error => console.warn( 'No se pudo reproducir un sonido', error ) );
 }
 
-function createBlocks() {
+function createBlocks( level ) {
+  const { map } = LEVELS[ level - 1 ];
   const blocks = [];
   BLOCK_ROWS.forEach( ( color, row ) => {
     for ( let column = 0; column < BLOCK_COLUMNS; column++ ) {
+      if ( map[ row ][ column ] !== 'X' ) continue;
+
       blocks.push( {
         x: BLOCKS_X + column * BLOCK_WIDTH,
         y: BLOCKS_Y + row * BLOCK_HEIGHT,
@@ -50,12 +89,13 @@ function createBlocks() {
 }
 
 const state = {
-  status: 'serving', // 'serving' | 'playing' | 'won' | 'lost'
+  status: 'serving', // 'serving' | 'playing' | 'levelComplete' | 'won' | 'lost'
+  level: 1, // Nivel actual, de 1 a LEVELS.length
   score: 0,
   lives: 3,
   paddle: { x: 319, y: 560, w: 162, h: 14 },
   ball: { x: 392, y: 544, size: 16, vx: 0, vy: 0 },
-  blocks: createBlocks(),
+  blocks: createBlocks( 1 ),
   explosions: [],
 };
 
@@ -73,6 +113,8 @@ function drawHud() {
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'left';
   ctx.fillText( `Puntos: ${ state.score }`, BLOCKS_X, 30 );
+  ctx.textAlign = 'center';
+  ctx.fillText( `Nivel: ${ state.level }`, canvas.width / 2, 30 );
   ctx.textAlign = 'right';
   ctx.fillText( `Vidas: ${ state.lives }`, canvas.width - BLOCKS_X, 30 );
 }
@@ -85,7 +127,7 @@ function drawMessage() {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.font = '36px sans-serif';
-  ctx.fillText( message.title, canvas.width / 2, 370 );
+  ctx.fillText( message.title.replace( '{level}', state.level ), canvas.width / 2, 370 );
   ctx.font = '20px sans-serif';
   ctx.fillText( message.hint, canvas.width / 2, 420 );
 }
@@ -122,21 +164,31 @@ function placeBallOnPaddle() {
 }
 
 function launchBall() {
-  state.ball.vx = BALL_SPEED * Math.sin( LAUNCH_ANGLE );
-  state.ball.vy = -BALL_SPEED * Math.cos( LAUNCH_ANGLE );
+  const { ballSpeed } = LEVELS[ state.level - 1 ];
+  state.ball.vx = ballSpeed * Math.sin( LAUNCH_ANGLE );
+  state.ball.vy = -ballSpeed * Math.cos( LAUNCH_ANGLE );
   state.status = 'playing';
 }
 
 function restartGame() {
   state.status = 'serving';
+  state.level = 1;
   state.score = 0;
   state.lives = 3;
-  state.blocks = createBlocks();
+  state.blocks = createBlocks( state.level );
   state.explosions = [];
+}
+
+function startNextLevel() {
+  state.level++;
+  state.blocks = createBlocks( state.level );
+  state.explosions = [];
+  state.status = 'serving';
 }
 
 function handleAction() {
   if ( state.status === 'serving' ) launchBall();
+  else if ( state.status === 'levelComplete' ) startNextLevel();
   else if ( state.status === 'won' || state.status === 'lost' ) restartGame();
 }
 
@@ -184,9 +236,10 @@ function bounceOffPaddle() {
   const paddleCenter = paddle.x + paddle.w / 2;
   const offset = ( ballCenter - paddleCenter ) / ( paddle.w / 2 );
   const angle = Math.max( -1, Math.min( 1, offset ) ) * MAX_BOUNCE_ANGLE;
+  const { ballSpeed } = LEVELS[ state.level - 1 ];
 
-  ball.vx = BALL_SPEED * Math.sin( angle );
-  ball.vy = -BALL_SPEED * Math.cos( angle );
+  ball.vx = ballSpeed * Math.sin( angle );
+  ball.vy = -ballSpeed * Math.cos( angle );
   ball.y = paddle.y - ball.size;
   playSound( bounceSound );
 }
@@ -221,7 +274,7 @@ function hitBlock() {
   if ( !state.blocks.some( candidate => candidate.alive ) ) {
     state.ball.vx = 0;
     state.ball.vy = 0;
-    state.status = 'won';
+    state.status = state.level < LEVELS.length ? 'levelComplete' : 'won';
   }
 }
 
