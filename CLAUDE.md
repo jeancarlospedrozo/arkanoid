@@ -8,13 +8,20 @@ Arkanoid/Breakout browser game. `index.html` at the repo root is the entry point
 
 To run the game, open `index.html` directly in a browser; it needs no server or install. There is no package manifest, build, lint, or test setup, so there are no commands to run. Update this file when they are added.
 
+The game has three levels, defined in the `LEVELS` constant in `src/game.js`, each with a block map and a ball speed.
+
 ## Workflow: spec-driven development
 
-Features are meant to be built through two vendored skills (`Klerith/fernando-skills`, pinned in `skills-lock.json`):
+Features are built through two vendored skills (`Klerith/fernando-skills`, pinned in `skills-lock.json`):
 
 1. `/spec <description>` asks clarifying questions, then writes `specs/NN-slug.md` in `Draft` state. It writes no code.
-2. The human re-reads the spec and changes its state to `Approved`. The agent never does this.
+2. The human re-reads the spec, changes its state to `Approved`, and commits it. The agent never approves a spec.
 3. `/spec-impl NN-slug` refuses any spec not marked approved, creates branch `spec-NN-slug` (controlled by `AutoCreateBranch` in `specs/.spec-config.yml`), and implements the plan one step at a time, pausing for diff review after each. It never commits on its own.
+4. The human checks the spec's acceptance criteria, changes its state to `Implemented`, commits, and merges the branch into `main`.
+
+With no automated tests, verification is manual in the browser. After each step, the agent runs `node --check src/game.js` and states which manual tests are still pending.
+
+Specs use the template's English headings and state names, with the body in Spanish. Anything a spec lists as out of scope goes in its own spec, not on the current branch.
 
 The skills live in `.agents/skills/`; `.claude/skills/` holds symlinks to them so Claude Code registers `/spec` and `/spec-impl`.
 
